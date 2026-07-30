@@ -4,7 +4,15 @@ plugins {
 }
 
 group = "net.mezzdev.gradle"
-version = "0.1.0-SNAPSHOT"
+version = providers.gradleProperty("VERSION")
+	.map { versionName ->
+		versionName.removePrefix("v")
+	}
+	.orElse(providers.environmentVariable("TAG_NAME").map { tagName ->
+		tagName.removePrefix("v")
+	})
+	.orElse("0.1.0-SNAPSHOT")
+	.get()
 
 dependencies {
 	implementation("com.diffplug.spotless:spotless-plugin-gradle:8.8.0")
