@@ -56,9 +56,15 @@ publishing {
 		}
 	}
 	repositories {
-		val deployDir = project.findProperty("DEPLOY_DIR")
-		if (deployDir != null) {
-			maven(deployDir)
+		val deployRepositoryUrl = providers.gradleProperty("DEPLOY_DIR")
+			.orElse(providers.environmentVariable("local_maven_url"))
+			.orElse(providers.environmentVariable("MAVEN_DEPLOY_DIR"))
+			.orElse(providers.environmentVariable("local_maven"))
+		if (deployRepositoryUrl.isPresent) {
+			maven {
+				name = "BlameJared"
+				url = uri(deployRepositoryUrl.get())
+			}
 		}
 	}
 }

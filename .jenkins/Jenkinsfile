@@ -4,10 +4,6 @@ pipeline {
         jdk "jdk-25"
     }
 
-    environment {
-        ORG_GRADLE_PROJECT_BUILD_NUMBER = "${env.BUILD_NUMBER}"
-    }
-
     stages {
         stage('Clean') {
             steps {
@@ -32,15 +28,11 @@ pipeline {
                     if (!env.TAG_NAME?.trim()) {
                         error 'TAG_NAME is not set; refusing to publish without a tag version.'
                     }
+                    if (!env.local_maven_url?.trim() && !env.MAVEN_DEPLOY_DIR?.trim() && !env.local_maven?.trim()) {
+                        error 'Jared Maven environment is not set; expected local_maven_url, MAVEN_DEPLOY_DIR, or local_maven.'
+                    }
                 }
-                withCredentials([
-                    string(
-                        credentialsId: 'java-formatting-maven-deploy-dir',
-                        variable: 'ORG_GRADLE_PROJECT_DEPLOY_DIR'
-                    )
-                ]) {
-                    sh "./gradlew publish -PVERSION=${env.TAG_NAME}"
-                }
+                sh "./gradlew publish -PVERSION=${env.TAG_NAME}"
             }
         }
     }
