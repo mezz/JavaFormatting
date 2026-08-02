@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
 	`kotlin-dsl`
+	jacoco
 	`maven-publish`
 }
 
@@ -35,10 +36,48 @@ dependencies {
 	implementation("com.github.javaparser:javaparser-core:3.27.1")
 	testImplementation(gradleTestKit())
 	testImplementation(kotlin("test-junit5"))
+	testRuntimeOnly("org.jacoco:org.jacoco.agent:${jacoco.toolVersion}:runtime")
 }
 
 tasks.test {
 	useJUnitPlatform()
+	doFirst {
+		delete(layout.buildDirectory.dir("jacoco/functional"))
+	}
+}
+
+fun jacocoExecutionData() = fileTree(layout.buildDirectory.dir("jacoco")) {
+	include("*.exec")
+	include("functional/*.exec")
+}
+
+tasks.jacocoTestReport {
+	dependsOn(tasks.test)
+	executionData(jacocoExecutionData())
+	reports {
+		xml.required.set(true)
+		html.required.set(true)
+		csv.required.set(false)
+	}
+}
+
+tasks.jacocoTestCoverageVerification {
+	dependsOn(tasks.test)
+	executionData(jacocoExecutionData())
+	violationRules {
+		rule {
+			limit {
+				counter = "LINE"
+				value = "COVEREDRATIO"
+				minimum = "0.80".toBigDecimal()
+			}
+		}
+	}
+}
+
+tasks.check {
+	dependsOn(tasks.jacocoTestReport)
+	dependsOn(tasks.jacocoTestCoverageVerification)
 }
 
 gradlePlugin {

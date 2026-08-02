@@ -3,8 +3,10 @@ package net.mezzdev.gradle.spotless
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.jupiter.api.io.TempDir
+import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
+import kotlin.io.path.name
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertTrue
@@ -229,6 +231,27 @@ class SpotlessFormattingPluginFunctionalTest {
 	private fun gradleRunner(arguments: List<String>): GradleRunner =
 		GradleRunner.create()
 			.withProjectDir(projectDir.toFile())
-			.withArguments(arguments + "--stacktrace")
+			.withArguments(functionalCoverageArguments() + arguments + "--stacktrace")
 			.withPluginClasspath()
+
+	private fun functionalCoverageArguments(): List<String> {
+		val jacocoAgentPath = jacocoRuntimeAgentPath() ?: return emptyList()
+		val functionalExecDir = Path.of(System.getProperty("user.dir"), "build", "jacoco", "functional")
+		Files.createDirectories(functionalExecDir)
+		val functionalExecFile = functionalExecDir.resolve("${projectDir.name}.exec")
+		return listOf(
+			"-Dorg.gradle.jvmargs=-javaagent:$jacocoAgentPath=destfile=$functionalExecFile,append=true"
+		)
+	}
+
+	private fun jacocoRuntimeAgentPath(): Path? {
+		return System.getProperty("java.class.path")
+			.split(File.pathSeparator)
+			.asSequence()
+			.map { Path.of(it) }
+			.firstOrNull { path ->
+				val fileName = path.fileName.toString()
+				fileName.startsWith("org.jacoco.agent-") && fileName.endsWith("-runtime.jar")
+			}
+	}
 }

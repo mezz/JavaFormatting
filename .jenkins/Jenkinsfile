@@ -15,7 +15,7 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh './gradlew test validatePlugins'
+                sh './gradlew check'
             }
         }
 
@@ -40,6 +40,12 @@ pipeline {
     post {
         always {
             junit allowEmptyResults: true, testResults: 'build/test-results/**/*.xml'
+            recordCoverage(
+                tools: [[parser: 'JACOCO', pattern: 'build/reports/jacoco/test/jacocoTestReport.xml']],
+                id: 'coverage',
+                name: 'Code Coverage',
+                sourceCodeRetention: 'LAST_BUILD'
+            )
         }
     }
 }
