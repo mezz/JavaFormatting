@@ -151,6 +151,30 @@ class SpotlessFormattingPluginFunctionalTest {
 		assertContains(result.output, "Ternary operators are banned")
 	}
 
+	@Test
+	fun `bundled eclipse formatter survives clean and spotless check in one invocation`() {
+		writeConsumerBuild(
+			"""
+			plugins {
+				java
+				id("net.mezzdev.java-formatting")
+			}
+
+			javaFormatting {
+				eclipseFormatter()
+			}
+			"""
+		)
+		writeTernarySource()
+
+		runGradle("spotlessApply")
+		val result = runGradle("clean", "spotlessCheck")
+
+		assertTrue(result.task(":spotlessCheck")?.outcome in setOf(TaskOutcome.SUCCESS, TaskOutcome.UP_TO_DATE))
+		assertTrue(Files.isRegularFile(projectDir.resolve(".gradle/mezz-spotless-formatting/eclipse-java.properties")))
+		assertTrue(Files.notExists(projectDir.resolve("build/mezz-spotless-formatting/eclipse-java.properties")))
+	}
+
 	private fun writeConsumerBuild(buildFile: String) {
 		Files.writeString(
 			projectDir.resolve("settings.gradle.kts"),

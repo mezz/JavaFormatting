@@ -304,10 +304,7 @@ private fun bundledEclipseConfigFile(project: Project): File {
 		?.use { it.readBytes() }
 		?: error("Missing bundled resource: $resourceName")
 
-	val configFile = project.rootProject.layout.buildDirectory
-		.file("mezz-spotless-formatting/eclipse-java.properties")
-		.get()
-		.asFile
+	val configFile = project.rootProject.file(".gradle/mezz-spotless-formatting/eclipse-java.properties")
 	if (!configFile.isFile || !configFile.readBytes().contentEquals(resourceBytes)) {
 		configFile.parentFile.mkdirs()
 		configFile.writeBytes(resourceBytes)
