@@ -1,3 +1,6 @@
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
 	`kotlin-dsl`
 	`maven-publish`
@@ -13,6 +16,19 @@ version = providers.gradleProperty("VERSION")
 	})
 	.orElse("0.1.0-SNAPSHOT")
 	.get()
+
+java {
+	toolchain {
+		languageVersion.set(JavaLanguageVersion.of(17))
+	}
+}
+
+kotlin {
+	jvmToolchain(17)
+	compilerOptions {
+		jvmTarget.set(JvmTarget.JVM_17)
+	}
+}
 
 dependencies {
 	implementation("com.diffplug.spotless:spotless-plugin-gradle:8.8.0")

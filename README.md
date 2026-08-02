@@ -5,6 +5,8 @@ Reusable Java formatting rules for Gradle projects.
 This plugin provides the Java formatting conventions used by mezz projects. It
 wraps Spotless and adds a few project-specific Java source formatters.
 
+Requires Java 17 or newer.
+
 ## Usage
 
 Resolve the plugin from Jared's Maven:
