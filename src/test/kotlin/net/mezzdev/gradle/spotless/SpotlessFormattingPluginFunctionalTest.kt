@@ -7,6 +7,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.test.Test
 import kotlin.test.assertContains
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class SpotlessFormattingPluginFunctionalTest {
@@ -175,6 +176,46 @@ class SpotlessFormattingPluginFunctionalTest {
 		assertTrue(Files.notExists(projectDir.resolve("build/mezz-spotless-formatting/eclipse-java.properties")))
 	}
 
+	@Test
+	fun `all aligns multiline fluent chain closing parentheses with selector continuation`() {
+		writeConsumerBuild(
+			"""
+			plugins {
+				java
+				id("net.mezzdev.java-formatting")
+			}
+
+			javaFormatting {
+				all()
+			}
+			"""
+		)
+		val sourceFile = writeFluentChainSource()
+
+		runGradle("spotlessApply")
+
+		val expected = """
+			import java.util.Map;
+
+			class Test {
+				void test() {
+					bookmarkAddPosition = bookmarks.addValue(
+							"addBookmarksToFrontEnabled",
+							BookmarkAddPosition.END,
+							enumSerializer(BookmarkAddPosition.class, Map.of(
+								"false", BookmarkAddPosition.END,
+								"true", BookmarkAddPosition.FRONT
+							))
+						)
+						.addValue(7)
+						.setTrusted()
+						.build();
+				}
+			}
+			""".trimIndent() + "\n"
+		assertEquals(expected, Files.readString(sourceFile))
+	}
+
 	private fun writeConsumerBuild(buildFile: String) {
 		Files.writeString(
 			projectDir.resolve("settings.gradle.kts"),
@@ -209,15 +250,43 @@ class SpotlessFormattingPluginFunctionalTest {
 			sourceDir.resolve("Test.java"),
 			"""
 			class Test {
-			→private final boolean flag = true;
+				private final boolean flag = true;
 
-			→int value() {
-			→→return flag ? 1 : 2;
-			→}
+				int value() {
+					return flag ? 1 : 2;
+				}
 			}
-			""".trimIndent()
-				.replace("→", "\t") + "\n"
+			""".trimIndent() + "\n"
 		)
+	}
+
+	private fun writeFluentChainSource(): Path {
+		val sourceDir = projectDir.resolve("src/main/java")
+		Files.createDirectories(sourceDir)
+		val sourceFile = sourceDir.resolve("Test.java")
+		Files.writeString(
+			sourceFile,
+			"""
+			import java.util.Map;
+
+			class Test {
+				void test() {
+					bookmarkAddPosition = bookmarks.addValue(
+						"addBookmarksToFrontEnabled",
+						BookmarkAddPosition.END,
+						enumSerializer(BookmarkAddPosition.class, Map.of(
+							"false", BookmarkAddPosition.END,
+							"true", BookmarkAddPosition.FRONT
+						))
+					)
+						.addValue(7)
+						.setTrusted()
+						.build();
+				}
+			}
+			""".trimIndent() + "\n"
+		)
+		return sourceFile
 	}
 
 	private fun runGradle(vararg arguments: String) =

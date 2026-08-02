@@ -12,6 +12,7 @@ class FormatterSerializationTest {
 	@Test
 	fun `formatter singletons preserve identity after java serialization`() {
 		assertSame(ControlStatementConditionFormatter, roundTrip(ControlStatementConditionFormatter))
+		assertSame(FluentMethodChainClosingParenthesesFormatter, roundTrip(FluentMethodChainClosingParenthesesFormatter))
 		assertSame(MixinAnnotationArgumentFormatter, roundTrip(MixinAnnotationArgumentFormatter))
 		assertSame(NoTernaryOperatorFormatter, roundTrip(NoTernaryOperatorFormatter))
 		assertSame(SingleExpressionLambdaCallFormatter, roundTrip(SingleExpressionLambdaCallFormatter))

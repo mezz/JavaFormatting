@@ -3,6 +3,7 @@ package net.mezzdev.gradle.spotless
 import com.diffplug.gradle.spotless.JavaExtension
 import com.diffplug.gradle.spotless.SpotlessExtension
 import net.mezzdev.gradle.spotless.formatter.ControlStatementConditionFormatter
+import net.mezzdev.gradle.spotless.formatter.FluentMethodChainClosingParenthesesFormatter
 import net.mezzdev.gradle.spotless.formatter.MixinAnnotationArgumentFormatter
 import net.mezzdev.gradle.spotless.formatter.NoTernaryOperatorFormatter
 import net.mezzdev.gradle.spotless.formatter.SingleExpressionLambdaCallFormatter
@@ -65,6 +66,7 @@ fun JavaExtension.leadingTabs() {
 
 fun JavaExtension.customRules() {
 	singleExpressionLambdaCalls()
+	fluentMethodChainClosingParentheses()
 	mixinAnnotationArguments()
 	multilineControlStatementConditions()
 	noTernaryOperators()
@@ -75,6 +77,15 @@ fun JavaExtension.singleExpressionLambdaCalls() {
 		custom(
 			"format single-expression lambda call closing parentheses",
 			SingleExpressionLambdaCallFormatter
+		)
+	}
+}
+
+fun JavaExtension.fluentMethodChainClosingParentheses() {
+	applyCustomRule("fluentMethodChainClosingParentheses") {
+		custom(
+			"format fluent method chain closing parentheses",
+			FluentMethodChainClosingParenthesesFormatter
 		)
 	}
 }
@@ -147,6 +158,10 @@ open class JavaFormattingSpotlessExtension(
 
 	fun singleExpressionLambdaCalls() {
 		javaExtension.singleExpressionLambdaCalls()
+	}
+
+	fun fluentMethodChainClosingParentheses() {
+		javaExtension.fluentMethodChainClosingParentheses()
 	}
 
 	fun mixinAnnotationArguments() {
@@ -230,6 +245,13 @@ open class JavaFormattingExtension @Inject constructor(
 		}
 	}
 
+	fun fluentMethodChainClosingParentheses() {
+		targetJavaSources()
+		configureJava { javaExtension ->
+			javaExtension.fluentMethodChainClosingParentheses()
+		}
+	}
+
 	fun mixinAnnotationArguments() {
 		targetJavaSources()
 		configureJava { javaExtension ->
@@ -279,7 +301,7 @@ private val appliedSpotlessBlockRules = Collections.synchronizedMap(WeakHashMap<
 private fun JavaExtension.applyCustomRule(name: String, configure: JavaExtension.() -> Unit) {
 	applyRule(name) {
 		configure()
-		bumpThisNumberIfACustomStepChanges(8)
+		bumpThisNumberIfACustomStepChanges(9)
 	}
 }
 

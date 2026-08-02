@@ -1,0 +1,105 @@
+package net.mezzdev.gradle.spotless.formatter
+
+import kotlin.test.Test
+import kotlin.test.assertEquals
+
+class FluentMethodChainClosingParenthesesFormatterTest {
+	@Test
+	fun `multiline fluent chain call body is indented to match selector continuation`() {
+		val source = java(
+			"""
+			class Test {
+				void test() {
+					bookmarkAddPosition = bookmarks.addValue(
+						"addBookmarksToFrontEnabled",
+						BookmarkAddPosition.END,
+						enumSerializer(BookmarkAddPosition.class, Map.of(
+							"false", BookmarkAddPosition.END,
+							"true", BookmarkAddPosition.FRONT
+						))
+					)
+						.build();
+				}
+			}
+			"""
+		)
+		val expected = java(
+			"""
+			class Test {
+				void test() {
+					bookmarkAddPosition = bookmarks.addValue(
+							"addBookmarksToFrontEnabled",
+							BookmarkAddPosition.END,
+							enumSerializer(BookmarkAddPosition.class, Map.of(
+								"false", BookmarkAddPosition.END,
+								"true", BookmarkAddPosition.FRONT
+							))
+						)
+						.build();
+				}
+			}
+			"""
+		)
+
+		assertEquals(expected, FluentMethodChainClosingParenthesesFormatter.apply(source))
+	}
+
+	@Test
+	fun `already aligned fluent chain call body is unchanged`() {
+		val source = java(
+			"""
+			class Test {
+				void test() {
+					bookmarkAddPosition = bookmarks.addValue(
+							"addBookmarksToFrontEnabled",
+							BookmarkAddPosition.END,
+							enumSerializer(BookmarkAddPosition.class, Map.of(
+								"false", BookmarkAddPosition.END,
+								"true", BookmarkAddPosition.FRONT
+							))
+						)
+						.build();
+				}
+			}
+			"""
+		)
+
+		assertEquals(source, FluentMethodChainClosingParenthesesFormatter.apply(source))
+	}
+
+	@Test
+	fun `non-chained multiline calls are unchanged`() {
+		val source = java(
+			"""
+			class Test {
+				void test() {
+					bookmarkAddPosition = bookmarks.addValue(
+						"addBookmarksToFrontEnabled",
+						BookmarkAddPosition.END
+					);
+				}
+			}
+			"""
+		)
+
+		assertEquals(source, FluentMethodChainClosingParenthesesFormatter.apply(source))
+	}
+
+	@Test
+	fun `text block contents are unchanged`() {
+		val source = java(
+			"""
+			class Test {
+				String test() {
+					return ${"\"\"\""}
+					)
+						.build();
+					${"\"\"\""};
+				}
+			}
+			"""
+		)
+
+		assertEquals(source, FluentMethodChainClosingParenthesesFormatter.apply(source))
+	}
+}

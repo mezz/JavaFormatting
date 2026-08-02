@@ -52,6 +52,7 @@ Or apply only the parts you want:
 javaFormatting {
 	baseSpotlessRules()
 	eclipseFormatter()
+	fluentMethodChainClosingParentheses()
 	mixinAnnotationArguments()
 	noTernaryOperators()
 }
@@ -120,6 +121,7 @@ root project can override it with `config/spotless/eclipse-java.properties`.
 `customRules()` enables:
 
 - `singleExpressionLambdaCalls()`
+- `fluentMethodChainClosingParentheses()`
 - `mixinAnnotationArguments()`
 - `multilineControlStatementConditions()`
 - `noTernaryOperators()`
