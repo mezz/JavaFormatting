@@ -6,6 +6,12 @@ pipeline {
 
     stages {
         stage('Clean') {
+            when {
+                anyOf {
+                    branch 'main'
+                    buildingTag()
+                }
+            }
             steps {
                 echo 'Cleaning Project'
                 sh 'chmod +x gradlew'
@@ -14,6 +20,9 @@ pipeline {
         }
 
         stage('Build') {
+            when {
+                branch 'main'
+            }
             steps {
                 sh './gradlew check'
             }
@@ -32,7 +41,7 @@ pipeline {
                         error 'Jared Maven environment is not set; expected local_maven_url, MAVEN_DEPLOY_DIR, or local_maven.'
                     }
                 }
-                sh "./gradlew publish -PVERSION=${env.TAG_NAME}"
+                sh './gradlew check publish -PVERSION="$TAG_NAME"'
             }
         }
     }

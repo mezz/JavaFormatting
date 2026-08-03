@@ -1,6 +1,6 @@
 # Java Formatting
 
-[![Build Status](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fci.blamejared.com%2Fjob%2Fmezz%2Fjob%2FJavaFormatting%2Fview%2Ftags%2Fjob%2Fv0.3.0%2F&label=build)](https://ci.blamejared.com/job/mezz/job/JavaFormatting/view/tags/job/v0.3.0/)
+[![Build Status](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fci.blamejared.com%2Fjob%2Fmezz%2Fjob%2FJavaFormatting%2Fjob%2Fmain%2F&label=build)](https://ci.blamejared.com/job/mezz/job/JavaFormatting/job/main/)
 [![Latest Version](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fmaven.blamejared.com%2Fnet%2Fmezzdev%2Fjava-formatting%2Fnet.mezzdev.java-formatting.gradle.plugin%2Fmaven-metadata.xml&label=version)](https://maven.blamejared.com/net/mezzdev/java-formatting/net.mezzdev.java-formatting.gradle.plugin/maven-metadata.xml)
 [![Java](https://img.shields.io/badge/java-17%2B-blue)](https://adoptium.net/temurin/releases/?version=17)
 [![License](https://img.shields.io/github/license/mezz/JavaFormatting)](LICENSE)
