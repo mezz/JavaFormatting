@@ -3,14 +3,14 @@ pipeline {
     tools {
         jdk "jdk-17"
     }
+    environment {
+        RELEASE_TAG = ''
+    }
 
     stages {
         stage('Clean') {
             when {
-                anyOf {
-                    branch 'main'
-                    buildingTag()
-                }
+                branch 'main'
             }
             steps {
                 echo 'Cleaning Project'
@@ -28,20 +28,42 @@ pipeline {
             }
         }
 
-        stage('Publish Maven') {
+        stage('Resolve Release Tag') {
             when {
-                buildingTag()
+                branch 'main'
             }
             steps {
                 script {
-                    if (!env.TAG_NAME?.trim()) {
-                        error 'TAG_NAME is not set; refusing to publish without a tag version.'
+                    sh 'git fetch --tags --force'
+                    env.RELEASE_TAG = sh(
+                        script: "git tag --points-at HEAD --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -n 1",
+                        returnStdout: true
+                    ).trim()
+                    if (env.RELEASE_TAG) {
+                        echo "Release tag found on HEAD: ${env.RELEASE_TAG}"
+                    } else {
+                        echo 'No release tag found on HEAD; publish will be skipped.'
                     }
+                }
+            }
+        }
+
+        stage('Publish Maven') {
+            when {
+                allOf {
+                    branch 'main'
+                    expression {
+                        return env.RELEASE_TAG?.trim() ? true : false
+                    }
+                }
+            }
+            steps {
+                script {
                     if (!env.local_maven_url?.trim() && !env.MAVEN_DEPLOY_DIR?.trim() && !env.local_maven?.trim()) {
                         error 'Jared Maven environment is not set; expected local_maven_url, MAVEN_DEPLOY_DIR, or local_maven.'
                     }
                 }
-                sh './gradlew check publish -PVERSION="$TAG_NAME"'
+                sh './gradlew check publish -PVERSION="$RELEASE_TAG"'
             }
         }
     }
