@@ -145,6 +145,38 @@ class FluentMethodChainClosingParenthesesFormatterTest {
 	}
 
 	@Test
+	fun `attached selector after multiline lambda argument is split and indented to match selector continuation`() {
+		val source = java(
+			"""
+			class Test {
+				void test() {
+					Comparator<String> minecraftCraftingFirst = Comparator.comparing((String s) -> {
+						String vanillaCrafting = RecipeTypes.CRAFTING.getUid().toString();
+						return s.equals(vanillaCrafting);
+					}).reversed();
+				}
+			}
+			"""
+		)
+
+		val expected = java(
+			"""
+			class Test {
+				void test() {
+					Comparator<String> minecraftCraftingFirst = Comparator.comparing((String s) -> {
+							String vanillaCrafting = RecipeTypes.CRAFTING.getUid().toString();
+							return s.equals(vanillaCrafting);
+						})
+						.reversed();
+				}
+			}
+			"""
+		)
+
+		assertEquals(expected, FluentMethodChainClosingParenthesesFormatter.apply(source))
+	}
+
+	@Test
 	fun `already aligned fluent chain call body is unchanged`() {
 		val source = java(
 			"""

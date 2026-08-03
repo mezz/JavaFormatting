@@ -63,7 +63,7 @@ object FluentMethodChainClosingParenthesesFormatter : FormatterFunc, Serializabl
 		}
 
 		val closingLine = splitAttachedSelector(lines, candidate) ?: return
-		if (closingLine.trim() != ")") {
+		if (!closingLine.isStandaloneClosingParenthesisLine()) {
 			return
 		}
 
@@ -197,6 +197,12 @@ object FluentMethodChainClosingParenthesesFormatter : FormatterFunc, Serializabl
 
 	private fun String.containsLineCommentOrBlockComment(): Boolean {
 		return contains("//") || contains("/*") || contains("*/")
+	}
+
+	private fun String.isStandaloneClosingParenthesisLine(): Boolean {
+		val trimmed = trim()
+		return trimmed == ")" ||
+			(trimmed.endsWith(")") && trimmed.dropLast(1).all { it == '}' })
 	}
 
 	private data class ParenthesisToken(
