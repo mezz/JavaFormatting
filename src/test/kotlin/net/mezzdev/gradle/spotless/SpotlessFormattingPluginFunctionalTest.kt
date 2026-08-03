@@ -210,6 +210,9 @@ class SpotlessFormattingPluginFunctionalTest {
 						.addValue(7)
 						.setTrusted()
 						.build();
+					lookupHistoryEnabled = lookups.addBoolean("enabled", false)
+						.setEditMode(ConfigValueEditMode.IMMEDIATE)
+						.build();
 				}
 			}
 			""".trimIndent() + "\n"
@@ -281,6 +284,11 @@ class SpotlessFormattingPluginFunctionalTest {
 					)
 						.addValue(7)
 						.setTrusted()
+						.build();
+					lookupHistoryEnabled = lookups.addBoolean(
+						"enabled",
+						false
+					).setEditMode(ConfigValueEditMode.IMMEDIATE)
 						.build();
 				}
 			}

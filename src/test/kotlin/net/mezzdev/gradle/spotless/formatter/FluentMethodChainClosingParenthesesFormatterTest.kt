@@ -5,6 +5,67 @@ import kotlin.test.assertEquals
 
 class FluentMethodChainClosingParenthesesFormatterTest {
 	@Test
+	fun `short fluent chain receiver call is collapsed and selector is moved to continuation line`() {
+		val source = java(
+			"""
+			class Test {
+				void test() {
+					lookupHistoryEnabled = lookups.addBoolean(
+						"enabled",
+						false
+					).setEditMode(ConfigValueEditMode.IMMEDIATE)
+						.build();
+				}
+			}
+			"""
+		)
+		val expected = java(
+			"""
+			class Test {
+				void test() {
+					lookupHistoryEnabled = lookups.addBoolean("enabled", false)
+						.setEditMode(ConfigValueEditMode.IMMEDIATE)
+						.build();
+				}
+			}
+			"""
+		)
+
+		assertEquals(expected, FluentMethodChainClosingParenthesesFormatter.apply(source))
+	}
+
+	@Test
+	fun `short fluent chain receiver call is collapsed when selector is already on continuation line`() {
+		val source = java(
+			"""
+			class Test {
+				void test() {
+					lookupHistoryEnabled = lookups.addBoolean(
+						"enabled",
+						false
+					)
+						.setEditMode(ConfigValueEditMode.IMMEDIATE)
+						.build();
+				}
+			}
+			"""
+		)
+		val expected = java(
+			"""
+			class Test {
+				void test() {
+					lookupHistoryEnabled = lookups.addBoolean("enabled", false)
+						.setEditMode(ConfigValueEditMode.IMMEDIATE)
+						.build();
+				}
+			}
+			"""
+		)
+
+		assertEquals(expected, FluentMethodChainClosingParenthesesFormatter.apply(source))
+	}
+
+	@Test
 	fun `multiline fluent chain call body is indented to match selector continuation`() {
 		val source = java(
 			"""
@@ -19,6 +80,45 @@ class FluentMethodChainClosingParenthesesFormatterTest {
 						))
 					)
 						.build();
+				}
+			}
+			"""
+		)
+		val expected = java(
+			"""
+			class Test {
+				void test() {
+					bookmarkAddPosition = bookmarks.addValue(
+							"addBookmarksToFrontEnabled",
+							BookmarkAddPosition.END,
+							enumSerializer(BookmarkAddPosition.class, Map.of(
+								"false", BookmarkAddPosition.END,
+								"true", BookmarkAddPosition.FRONT
+							))
+						)
+						.build();
+				}
+			}
+			"""
+		)
+
+		assertEquals(expected, FluentMethodChainClosingParenthesesFormatter.apply(source))
+	}
+
+	@Test
+	fun `multiline attached fluent chain call body is split and indented to match selector continuation`() {
+		val source = java(
+			"""
+			class Test {
+				void test() {
+					bookmarkAddPosition = bookmarks.addValue(
+						"addBookmarksToFrontEnabled",
+						BookmarkAddPosition.END,
+						enumSerializer(BookmarkAddPosition.class, Map.of(
+							"false", BookmarkAddPosition.END,
+							"true", BookmarkAddPosition.FRONT
+						))
+					).build();
 				}
 			}
 			"""

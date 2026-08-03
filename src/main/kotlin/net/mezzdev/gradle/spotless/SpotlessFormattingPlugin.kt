@@ -301,7 +301,7 @@ private val appliedSpotlessBlockRules = Collections.synchronizedMap(WeakHashMap<
 private fun JavaExtension.applyCustomRule(name: String, configure: JavaExtension.() -> Unit) {
 	applyRule(name) {
 		configure()
-		bumpThisNumberIfACustomStepChanges(9)
+		bumpThisNumberIfACustomStepChanges(10)
 	}
 }
 
