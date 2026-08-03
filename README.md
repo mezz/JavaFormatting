@@ -29,7 +29,7 @@ Apply the plugin in your project's `build.gradle.kts`:
 
 ```kotlin
 plugins {
-	id("net.mezzdev.java-formatting") version "0.3.3"
+	id("net.mezzdev.java-formatting") version "0.3.4"
 }
 ```
 
