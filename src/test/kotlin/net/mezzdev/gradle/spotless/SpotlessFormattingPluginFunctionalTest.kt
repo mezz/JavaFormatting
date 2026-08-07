@@ -219,6 +219,51 @@ class SpotlessFormattingPluginFunctionalTest {
 		assertEquals(expected, Files.readString(sourceFile))
 	}
 
+	@Test
+	fun `all puts wrapped method invocation arguments on separate lines`() {
+		writeConsumerBuild(
+			"""
+			plugins {
+				java
+				id("net.mezzdev.java-formatting")
+			}
+
+			javaFormatting {
+				all()
+			}
+			"""
+		)
+		val sourceFile = writeWrappedMethodInvocationSource()
+
+		runGradle("spotlessApply")
+
+		val expected = """
+			class Test {
+				Object test(Object instance) {
+					return instance.group(
+							Codec.STRING.optionalFieldOf("group", "").forGetter((shapedRecipe) -> {
+								return shapedRecipe.group;
+							}),
+							CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter((shapedRecipe) -> {
+								return shapedRecipe.category;
+							}),
+							ShapedRecipePattern.MAP_CODEC.forGetter((shapedRecipe) -> {
+								return shapedRecipe.pattern;
+							}),
+							Codec.list(SlotDisplay.CODEC).fieldOf("display").forGetter((shapedRecipe) -> {
+								return shapedRecipe.displays;
+							}),
+							ItemStackTemplate.CODEC.fieldOf("result").forGetter((shapedRecipe) -> {
+								return shapedRecipe.result;
+							})
+						)
+						.apply(instance, JeiShapedRecipe::new);
+				}
+			}
+			""".trimIndent() + "\n"
+		assertEquals(expected, Files.readString(sourceFile))
+	}
+
 	private fun writeConsumerBuild(buildFile: String) {
 		Files.writeString(
 			projectDir.resolve("settings.gradle.kts"),
@@ -290,6 +335,34 @@ class SpotlessFormattingPluginFunctionalTest {
 						false
 					).setEditMode(ConfigValueEditMode.IMMEDIATE)
 						.build();
+				}
+			}
+			""".trimIndent() + "\n"
+		)
+		return sourceFile
+	}
+
+	private fun writeWrappedMethodInvocationSource(): Path {
+		val sourceDir = projectDir.resolve("src/main/java")
+		Files.createDirectories(sourceDir)
+		val sourceFile = sourceDir.resolve("Test.java")
+		Files.writeString(
+			sourceFile,
+			"""
+			class Test {
+				Object test(Object instance) {
+					return instance.group(Codec.STRING.optionalFieldOf("group", "").forGetter((shapedRecipe) -> {
+						return shapedRecipe.group;
+					}), CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter((shapedRecipe) -> {
+						return shapedRecipe.category;
+					}), ShapedRecipePattern.MAP_CODEC.forGetter((shapedRecipe) -> {
+						return shapedRecipe.pattern;
+					}), Codec.list(SlotDisplay.CODEC).fieldOf("display").forGetter((shapedRecipe) -> {
+						return shapedRecipe.displays;
+					}), ItemStackTemplate.CODEC.fieldOf("result").forGetter((shapedRecipe) -> {
+						return shapedRecipe.result;
+					}))
+					.apply(instance, JeiShapedRecipe::new);
 				}
 			}
 			""".trimIndent() + "\n"

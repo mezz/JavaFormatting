@@ -177,6 +177,59 @@ class FluentMethodChainClosingParenthesesFormatterTest {
 	}
 
 	@Test
+	fun `wrapped chained call arguments containing lambdas are put on separate lines`() {
+		val source = java(
+			"""
+			class Test {
+				Object test(Object instance) {
+					return instance.group(Codec.STRING.optionalFieldOf("group", "").forGetter((shapedRecipe) -> {
+						return shapedRecipe.group;
+					}), CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter((shapedRecipe) -> {
+						return shapedRecipe.category;
+					}), ShapedRecipePattern.MAP_CODEC.forGetter((shapedRecipe) -> {
+						return shapedRecipe.pattern;
+					}), Codec.list(SlotDisplay.CODEC).fieldOf("display").forGetter((shapedRecipe) -> {
+						return shapedRecipe.displays;
+					}), ItemStackTemplate.CODEC.fieldOf("result").forGetter((shapedRecipe) -> {
+						return shapedRecipe.result;
+					}))
+						.apply(instance, JeiShapedRecipe::new);
+				}
+			}
+			"""
+		)
+		val expected = java(
+			"""
+			class Test {
+				Object test(Object instance) {
+					return instance.group(
+							Codec.STRING.optionalFieldOf("group", "").forGetter((shapedRecipe) -> {
+								return shapedRecipe.group;
+							}),
+							CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter((shapedRecipe) -> {
+								return shapedRecipe.category;
+							}),
+							ShapedRecipePattern.MAP_CODEC.forGetter((shapedRecipe) -> {
+								return shapedRecipe.pattern;
+							}),
+							Codec.list(SlotDisplay.CODEC).fieldOf("display").forGetter((shapedRecipe) -> {
+								return shapedRecipe.displays;
+							}),
+							ItemStackTemplate.CODEC.fieldOf("result").forGetter((shapedRecipe) -> {
+								return shapedRecipe.result;
+							})
+						)
+						.apply(instance, JeiShapedRecipe::new);
+				}
+			}
+			"""
+		)
+
+		assertEquals(expected, FluentMethodChainClosingParenthesesFormatter.apply(source))
+		assertEquals(expected, FluentMethodChainClosingParenthesesFormatter.apply(expected))
+	}
+
+	@Test
 	fun `already aligned fluent chain call body is unchanged`() {
 		val source = java(
 			"""
