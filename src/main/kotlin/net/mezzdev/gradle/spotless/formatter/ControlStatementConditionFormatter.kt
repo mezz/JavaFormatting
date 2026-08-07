@@ -27,11 +27,8 @@ object ControlStatementConditionFormatter : FormatterFunc, Serializable {
 			.mapNotNull { header ->
 				formatControlStatement(document, header)
 			}
-			.sortedByDescending { it.startOffset }
 
-		return replacements.fold(source) { formattedSource, replacement ->
-			formattedSource.replaceRange(replacement.startOffset, replacement.endOffset, replacement.text)
-		}
+		return applySourceEdits(source, replacements)
 	}
 
 	private fun controlStatementHeaders(root: Node): List<ControlStatementHeader> {
@@ -145,7 +142,7 @@ object ControlStatementConditionFormatter : FormatterFunc, Serializable {
 	private fun formatControlStatement(
 		document: JavaParserFormatterSupport.SourceDocument,
 		header: ControlStatementHeader
-	): Replacement? {
+	): SourceEdit? {
 		val lines = document.lines
 		val openParenthesisRange = header.openParenthesis.requiredRange()
 		val closeParenthesisRange = header.closeParenthesis.requiredRange()
@@ -183,29 +180,31 @@ object ControlStatementConditionFormatter : FormatterFunc, Serializable {
 		val trimmedSuffix = suffix.trimStart()
 		if (trimmedSuffix.startsWith("{")) {
 			outputLines.add("$indent) $trimmedSuffix")
-			return Replacement(
-				document.offset(openParenthesisRange.begin.withColumn(1)),
-				document.offset(closeParenthesisRange.begin.withColumn(closingLine.length + 1)),
-				outputLines.joinToString("\n")
+			return SourceEdit(
+				startOffset = document.offset(openParenthesisRange.begin.withColumn(1)),
+				endOffsetExclusive = document.offset(closeParenthesisRange.begin.withColumn(closingLine.length + 1)),
+				text = outputLines.joinToString("\n")
 			)
 		}
 
 		val nextLine = lines.getOrNull(closeLineIndex + 1)
 		if (suffix.isBlank() && nextLine != null && nextLine.trimStart().startsWith("{")) {
 			outputLines.add("$indent) ${nextLine.trimStart()}")
-			return Replacement(
-				document.offset(openParenthesisRange.begin.withColumn(1)),
-				document.offset(closeParenthesisRange.begin.withLine(closeLineIndex + 2).withColumn(nextLine.length + 1)),
-				outputLines.joinToString("\n")
+			return SourceEdit(
+				startOffset = document.offset(openParenthesisRange.begin.withColumn(1)),
+				endOffsetExclusive = document.offset(
+					closeParenthesisRange.begin.withLine(closeLineIndex + 2).withColumn(nextLine.length + 1)
+				),
+				text = outputLines.joinToString("\n")
 			)
 		}
 
 		val finalConditionLineIndex = outputLines.lastIndex
 		outputLines[finalConditionLineIndex] += ")$suffix"
-		return Replacement(
-			document.offset(openParenthesisRange.begin.withColumn(1)),
-			document.offset(closeParenthesisRange.begin.withColumn(closingLine.length + 1)),
-			outputLines.joinToString("\n")
+		return SourceEdit(
+			startOffset = document.offset(openParenthesisRange.begin.withColumn(1)),
+			endOffsetExclusive = document.offset(closeParenthesisRange.begin.withColumn(closingLine.length + 1)),
+			text = outputLines.joinToString("\n")
 		)
 	}
 
@@ -263,11 +262,5 @@ object ControlStatementConditionFormatter : FormatterFunc, Serializable {
 		val keyword: JavaToken,
 		val openParenthesis: JavaToken,
 		val closeParenthesis: JavaToken
-	)
-
-	private data class Replacement(
-		val startOffset: Int,
-		val endOffset: Int,
-		val text: String
 	)
 }

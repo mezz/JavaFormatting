@@ -5,8 +5,6 @@ import java.io.Serial
 import java.io.Serializable
 
 object SingleExpressionLambdaCallFormatter : FormatterFunc, Serializable {
-	private const val MAX_COLLAPSED_LINE_LENGTH = 160
-
 	@Serial
 	private fun readResolve(): Any = SingleExpressionLambdaCallFormatter
 
